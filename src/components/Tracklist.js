@@ -3,9 +3,12 @@ import AddIcon from '@mui/icons-material/Add';
 
 export default function Tracklist(props) {
 
-    const {searchResults} = props;
-    function handleAddButton() {
-        console.log('Track added!');
+    const {searchResults, playlist, setPlaylist} = props;
+    function handleAddButton(track) {
+        setPlaylist([
+            ...playlist,
+            track
+        ]);
     }
 
     const searchLength = searchResults.length > 0;
@@ -58,7 +61,9 @@ export default function Tracklist(props) {
                         <Typography variant="h6" sx={{paddingLeft: '5px', width: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left'}}>{track.title}</Typography>
                         <Typography variant="h6" sx={{width: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left'}}>{track.artist}</Typography>
                         <Typography variant="h6" sx={{width: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left'}}>{track.album}</Typography>
-                        <Button onClick={handleAddButton}>
+                        <Button onClick={() => {
+                            handleAddButton(track);
+                        }}>
                             <AddIcon />
                         </Button>
                     </Paper>

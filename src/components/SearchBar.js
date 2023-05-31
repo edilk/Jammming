@@ -44,7 +44,7 @@ const Search = styled('div')(({ theme }) => ({
     },
 }));
 
-const theme = createTheme({
+export const theme = createTheme({
     palette: {
         success: {
             main: '#1DB954',

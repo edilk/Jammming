@@ -20,6 +20,8 @@ function App() {
 	const [searchInput, setSearchInput] = useState('');
 	const [accessToken, setAccessToken] = useState('');
 	const [searchResults, setSearchResults] = useState([]);
+	const [playlist, setPlaylist] = useState([]);
+	const [playlistName, setPlaylistName] = useState('New Playlist');
 
 	const CLIENT_ID = "181842b370ba40c4b78c6ebb9ddad7fa";
 	const CLIENT_SECRET = "df2e6789eee248d0ab89ed99669fa8d3";
@@ -39,11 +41,10 @@ function App() {
 	}, [])
 
 	async function search() {
-		console.log(`Searching for: ${searchInput}`);
-		console.log('My token: ' + accessToken);
 
 		const baseUrl = `https://api.spotify.com/v1/search?type=track&q=${searchInput}`;
 		let requestParams = {
+			method: 'GET',
 			headers: {
 				'Authorization': 'Bearer ' + accessToken
 			}
@@ -95,10 +96,19 @@ function App() {
 				pt: '100px',
 				display: 'flex',
 				flexDirection: 'row',
-				justifyContent: 'center'
+				justifyContent: 'center',
+				alignItems: 'start'
+
 			}}>
-				<SearchResults searchResults={searchResults}></SearchResults>
-				<Playlist></Playlist>
+				<SearchResults 
+					searchResults={searchResults}
+					playlist={playlist}
+					setPlaylist={setPlaylist}></SearchResults>
+				<Playlist 
+					playlistName={playlistName}
+					setPlaylistName={setPlaylistName}
+					playlist={playlist}
+					setPlaylist={setPlaylist}></Playlist>
 			</Box>
 		</main>
     </div>

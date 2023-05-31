@@ -2,7 +2,7 @@ import { Grid, Typography } from "@mui/material";
 import Tracklist from "./Tracklist";
 
 export default function SearchResults(props) {
-    const {searchResults} = props;
+    const {searchResults, playlist, setPlaylist} = props;
     return (
         <Grid container spacing={2} justifyContent={"center"}
             sx={{
@@ -10,7 +10,7 @@ export default function SearchResults(props) {
                 flexDirection: 'column'
             }}>
             <Typography variant='h3'>Results</Typography>
-            <Tracklist searchResults={searchResults}></Tracklist>
+            <Tracklist searchResults={searchResults} playlist={playlist} setPlaylist={setPlaylist}></Tracklist>
         </Grid>
     );
 }
