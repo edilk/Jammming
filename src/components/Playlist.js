@@ -4,7 +4,7 @@ import { theme } from "./SearchBar";
 
 export default function Playlist(props) {
 
-    const {playlistName, setPlaylistName, playlist, setPlaylist } = props;
+    const {playlistName, setPlaylistName, playlist, setPlaylist, onClick } = props;
     const isPlaylistEmpty = playlist.length < 1;
 
     function handleRemove(current) {
@@ -82,6 +82,7 @@ export default function Playlist(props) {
                             borderRadius: '20px',
                             marginLeft: '95px'
                         }}
+                        onClick={onClick}
                         >
                         Save To Spotify
                     </Button>

@@ -18,13 +18,35 @@ const theme = createTheme({
 function App() {
 
 	const [searchInput, setSearchInput] = useState('');
-	const [accessToken, setAccessToken] = useState('');
+	const [anotherAccessToken, setAnotherAccessToken] = useState('');
 	const [searchResults, setSearchResults] = useState([]);
 	const [playlist, setPlaylist] = useState([]);
 	const [playlistName, setPlaylistName] = useState('New Playlist');
 
 	const CLIENT_ID = "181842b370ba40c4b78c6ebb9ddad7fa";
 	const CLIENT_SECRET = "df2e6789eee248d0ab89ed99669fa8d3";
+	const redirectUri = 'http://localhost:3000/';
+	let accessToken = '';
+
+	function getAccessToken() {
+		if(accessToken) {
+			return accessToken;
+		}
+
+		const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/);
+		const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/);
+
+		if (accessTokenMatch && expiresInMatch) {
+			accessToken = accessTokenMatch[1];
+			const expiresIn = Number(expiresInMatch[1]);
+			window.setTimeout(() => accessToken='', expiresIn * 1000);
+			window.history.pushState('Access Token', null, '/');
+			return accessToken;
+		} else {
+			const accessUrl = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&scope=playlist-modify-public&redirect_uri=${redirectUri}`;
+			window.location = accessUrl;
+		}
+	}
 
 	useEffect(() => {
 		const baseUrl = 'https://accounts.spotify.com/api/token';
@@ -35,22 +57,25 @@ function App() {
             },
             body: 'grant_type=client_credentials&client_id=' + CLIENT_ID + '&client_secret=' + CLIENT_SECRET
         }
-        fetch(baseUrl, authParameters)
+     		fetch(baseUrl, authParameters)
                 .then(result => result.json())
-                .then(data => setAccessToken(data.access_token));
-	}, [])
+                .then(data => {
+					setAnotherAccessToken(data.access_token)
+					console.log(data)});
+	}, []);
 
-	async function search() {
+	function search() {
 
-		const baseUrl = `https://api.spotify.com/v1/search?type=track&q=${searchInput}`;
+		console.log(anotherAccessToken);
+		const baseUrl = `https://api.spotify.com/v1/search?type=track&q=${searchInput}&limit=50`;
 		let requestParams = {
 			method: 'GET',
 			headers: {
-				'Authorization': 'Bearer ' + accessToken
+				'Authorization': 'Bearer ' + anotherAccessToken
 			}
 		}
 
-		await fetch(baseUrl, requestParams)
+		fetch(baseUrl, requestParams)
 			.then(response => {
 				if (response.ok) {
 					return response.json();
@@ -67,6 +92,42 @@ function App() {
 					img: track.album.images[2].url
 				})));
 			})
+	}
+
+	function saveToSpotify() {
+
+		const accessToken = getAccessToken();
+
+		console.log(accessToken);
+		
+		const apiUrl = 'https://api.spotify.com/v1/me';
+		const headers = {
+			Authorization: `Bearer ${accessToken}`};
+		let user_id;
+
+		const tracksUris = playlist.map(track => track.uri);
+
+		fetch(apiUrl, {headers: headers})
+		.then(response => response.json())
+		.then(data => {
+			user_id = data.id;
+			return fetch(`https://api.spotify.com/v1/users/${user_id}/playlists`, {
+				headers: headers,
+				method: 'POST',
+				body: JSON.stringify({name: playlistName})})
+				.then(response => response.json())
+				.then(data => {
+					const playlist_id = data.id;
+					return fetch(`https://api.spotify.com/v1/users/${user_id}/playlists/${playlist_id}/tracks`, {
+						headers: headers,
+						method: 'POST',
+						body: JSON.stringify({uris: tracksUris})
+					});
+				});
+		});
+
+		setPlaylistName('New Playlist');
+		setPlaylist([]);
 	}
 
   	return (
@@ -108,9 +169,13 @@ function App() {
 					playlistName={playlistName}
 					setPlaylistName={setPlaylistName}
 					playlist={playlist}
-					setPlaylist={setPlaylist}></Playlist>
+					setPlaylist={setPlaylist}
+					onClick={saveToSpotify}></Playlist>
 			</Box>
 		</main>
+		<footer>
+			<Typography variant='subtitle1' sx={{color: 'white'}}>&copy; Edil Kamchybekov - 2023</Typography>
+		</footer>
     </div>
   );
 }
